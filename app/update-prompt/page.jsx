@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-
+import { useRouter } from "next/navigation";
 import Form from "@components/Form";
 
 const UpdatePrompt = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const promptId = searchParams.get("id");
-
+  
   const [post, setPost] = useState({ prompt: "", tag: "" });
   const [submitting, setIsSubmitting] = useState(false);
 
+  // Manually get the search params from the current URL
   useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const promptId = query.get("id");
+
     const getPromptDetails = async () => {
       const response = await fetch(`/api/prompt/${promptId}`);
       const data = await response.json();
@@ -26,11 +26,14 @@ const UpdatePrompt = () => {
     };
 
     if (promptId) getPromptDetails();
-  }, [promptId]);
+  }, []);
 
   const updatePrompt = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    const query = new URLSearchParams(window.location.search);
+    const promptId = query.get("id");
 
     if (!promptId) return alert("Missing PromptId!");
 
@@ -54,15 +57,13 @@ const UpdatePrompt = () => {
   };
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Form
-        type="Edit"
-        post={post}
-        setPost={setPost}
-        submitting={submitting}
-        handleSubmit={updatePrompt}
-      />
-    </Suspense>
+    <Form
+      type="Edit"
+      post={post}
+      setPost={setPost}
+      submitting={submitting}
+      handleSubmit={updatePrompt}
+    />
   );
 };
 
